@@ -1,9 +1,12 @@
 package com.example.journalapp.controller;
 import com.example.journalapp.entity.User;
+import com.example.journalapp.repository.UserRepository;
 import com.example.journalapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -14,20 +17,13 @@ public class UserController {
     @Autowired
     private UserService userService;
 
-    @GetMapping
-    public ResponseEntity<?> getAllUsers(){
-        List<User> all = userService.getAll();
-        return new ResponseEntity<>(all, HttpStatus.OK);
-    }
+    @Autowired
+    private UserRepository userRepository;
 
-    @PostMapping
-    public ResponseEntity<?> createUser(@RequestBody User user){
-       User savedUser =  userService.saveEntry(user);
-       return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
-    }
-
-    @PutMapping("/{userName}")
-    public ResponseEntity<?> updateUser(@RequestBody User user ,@PathVariable String userName){
+    @PutMapping
+    public ResponseEntity<?> updateUser(@RequestBody User user ){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String userName = authentication.getName();
         User userInDb = userService.findByUserName(userName);
         if(userInDb!=null) {
             userInDb.setUserName(user.getUserName());
@@ -37,5 +33,11 @@ public class UserController {
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
         }
+    }
+    @DeleteMapping
+    public ResponseEntity<?> deleteUserById(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        userRepository.deleteByUserName(authentication.getName());
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).body("User Deleted");
     }
 }
