@@ -9,8 +9,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -28,7 +26,7 @@ public class UserController {
         if(userInDb!=null) {
             userInDb.setUserName(user.getUserName());
             userInDb.setPassword(user.getPassword());
-            userService.saveEntry(userInDb);
+            userService.saveNewUser(userInDb);
             return ResponseEntity.ok(userInDb);
         } else {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
